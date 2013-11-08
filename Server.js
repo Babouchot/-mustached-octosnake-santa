@@ -42,7 +42,6 @@ function gamerConnection(socket){
 		players[nbPlayer] = socket;
 		socket.emit('registerEvent', nbPlayer++);
 
-		console.log(nbPlayer);
 		if (nbPlayer > 1) {
 			players[0].emit("newPlayerEvent");
 		}
@@ -59,6 +58,10 @@ function gamerConnection(socket){
 		
 		socket.on('directionChanged', function (playerInfo) {
 			gameState.direction[playerInfo.number] = playerInfo.direction;
+			if(playerInfo.number == 0 && nbPlayer > 1)
+				players[1].emit("directionChangedEvent", gameState.direction[playerInfo.number]);
+			else
+				players[0].emit("directionChangedEvent", gameState.direction[playerInfo.number]);
 			// console.log("new direction "+playerInfo.direction);
 		});
 	}
@@ -67,8 +70,6 @@ function gamerConnection(socket){
 
 
 var mainLoop = function () {
-
-	io.sockets.emit("directionChangedEvent", gameState);
 
 	setTimeout (function() {
 		mainLoop();

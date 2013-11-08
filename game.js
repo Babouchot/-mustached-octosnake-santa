@@ -3,7 +3,10 @@ var playerNumber;
 
 socket.on("registerEvent", function (n) {
     playerNumber = n;
-    console.log(playerNumber);
+});
+
+socket.on("directionChangedEvent", function (n) {
+    Crafty.trigger("MoveEvent", n)
 });
 
 socket.on("newPlayerEvent",  function () {
@@ -29,6 +32,9 @@ socket.on("newPlayerEvent",  function () {
             // On rajoute 2 parties au corps du serpent
             this.tail.append(this, true);
             this.tail.append(this, true);
+            this.bind("MoveEvent", function (e) {
+                this.head.direction = e;
+            });
 
         }
     });
@@ -153,17 +159,17 @@ addLoadListener(function() {
                 this.move(this.direction, this.speed * this.speedMultiplier);
             });
 
-            // Si le serpent touche un mur, on revient au menu
+            // Si le serpent touche un mur, on revient au main
             this.onHit("Wall", function() {
-                Crafty.scene("menu");
+                Crafty.scene("main");
             });
 
-            // Si le serpent touche sa queue, on revient au menu
+            // Si le serpent touche sa queue, on revient au main
             this.onHit("SnakePart", function(collision) {
 
                 // La hitbox des 2 premières parties du serpent est désactivée
                 if (!collision[0].obj.disabledHitBox) {
-                    Crafty.scene("menu");
+                    Crafty.scene("main");
                 }
             });
 
@@ -454,29 +460,6 @@ addLoadListener(function() {
             return this;
         }
     });
-
-    Crafty.scene("menu", function() {
-
-        clearInterval(bonusInterval);
-        clearInterval(sprintInterval);
-
-        // Background
-        Crafty.e("2D, Canvas, Image, Mouse").image(assetPath("snakescreen02.png")).attr({
-            z: -9999
-        }).bind('Click', function(e) {
-            Crafty.scene("main");
-        });
-
-        Crafty.e("2D, DOM, Text").attr({
-            x: 98,
-            y: 45,
-            w: 200
-        }).css({
-            font: '15px Verdana',
-            color: "black"
-        }).text(Math.round(currentScore));
-        
-    });
     
     
     Crafty.scene("highscores", function() {
@@ -516,6 +499,6 @@ addLoadListener(function() {
             font: '15px Verdana',
             color: "black"
         }).text("Loading");
-        Crafty.scene("menu");
+        Crafty.scene("main");
     });
 });
